@@ -1,29 +1,21 @@
 % Multi-vehicles Attack-resistant Cooperative Tracking
-function [RMSE]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,test_index,collu_design_mal_devi_coef,collu_rand_mal_devi_coef)
+function [RMSE]=KF_multivehicles_VarNumMal(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef)
 %% Set parameters
 
 dt=0.1; %Measurement interval of self and other observations
 t=0:dt:20; %Total simulation time
 
-% var_self=4; %Variance of self-observation
-% var_mea=9;  %Variance of observations from other vehicles
-% mal_var_coef=0.7872; %mal_var/var_mea
-
-% num_vehicle = 20; % Number of maximun other vehicles observing Vehicle 1
-% num_malicious = 0; % Number of malicous vehicles
-% num_minvehi=20; % Number of minimum other vehicles in sweeping simulation
 
 num_filter=7; %Filter number in comparative simulation of all filter and groundtruth
-% buffer_size=20; %Buffer size of sequence test
-% attack_mode = 'collu_design'; % Attacks mode of malicious vehicles, it can be "independent rand attack, colluding rand attack or colluding design attack".
+
+
 mal_index_mode = 'random'; %Index method of malicious vehicles
 
-% collu_design_mal_devi_coef=1; %malicious deviation/sigma_mea in collu_design attack
-% collu_rand_mal_devi_coef=10; %malicious deviation/sigma_mea in collu_rand attack
+
 collu_design_mal_deviation=collu_design_mal_devi_coef*sqrt(var_mea);
 collu_rand_mal_deviation=collu_rand_mal_devi_coef*sqrt(var_mea);
 
-% randAver_times = 20; %Interation number of whole route simulation
+
 
 size=length(t);
 F=[1 dt 0 0;
@@ -76,10 +68,6 @@ Q1=[0.1 0 0 0;
    0 0 0 0.2];%Noise matrix of movement of Vehicle 1
 
 %% Kalman Filtering
-msex11_=0;
-msev11_=0;
-msexY11_=0;
-msevY11_=0;
 msex_=zeros(1,num_vehicle);
 msev_=zeros(1,num_vehicle);
 
@@ -387,15 +375,15 @@ for time = 1:randAver_times
                 All_X1{5,j}(:,i+1)=X_1{j}(:,i+1);    
             end
             if(strcmp(filter_mode,'SeqMMSE')||strcmp(filter_mode,'Al'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqMMSE",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust,test_index);
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqMMSE",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{6,j}(:,i+1)=X_1{j}(:,i+1); 
             end
-            if(strcmp(filter_mode,'Dead_Reckon')||strcmp(filter_mode,'Al'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("Dead_Reckon",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust,test_index);
+            if(strcmp(filter_mode,'Dead_Reckon')||strcmp(filter_mode,'All'))
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("Dead_Reckon",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{7,j}(:,i+1)=X_1{j}(:,i+1); 
             end
             if(strcmp(filter_mode,'SeqResE')||strcmp(filter_mode,'All'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqResE",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust,test_index);
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqResE",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{8,j}(:,i+1)=X_1{j}(:,i+1); 
             end
             if(strcmp(filter_mode,'All_benign')||strcmp(filter_mode,'Al'))

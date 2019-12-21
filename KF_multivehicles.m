@@ -1,29 +1,17 @@
 % Multi-vehicles Attack-resistant Cooperative Tracking
-function [TPR,FPR,TNR,FNR]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,test_index,collu_design_mal_devi_coef,collu_rand_mal_devi_coef)
+function [TPR,FPR,TNR,FNR]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef)
 %% Set parameters
 
 dt=0.1; %Measurement interval of self and other observations
 t=0:dt:20; %Total simulation time
 
-% var_self=4; %Variance of self-observation
-% var_mea=9;  %Variance of observations from other vehicles
-% mal_var_coef=0.7872; %mal_var/var_mea
-
-% num_vehicle = 20; % Number of maximun other vehicles observing Vehicle 1
-% num_malicious = 0; % Number of malicous vehicles
-% num_minvehi=20; % Number of minimum other vehicles in sweeping simulation
-
 num_filter=7; %Filter number in comparative simulation of all filter and groundtruth
-% buffer_size=20; %Buffer size of sequence test
-% attack_mode = 'collu_design'; % Attacks mode of malicious vehicles, it can be "independent rand attack, colluding rand attack or colluding design attack".
-mal_index_mode = 'random'; %Index method of malicious vehicles
 
-% collu_design_mal_devi_coef=1; %malicious deviation/sigma_mea in collu_design attack
-% collu_rand_mal_devi_coef=10; %malicious deviation/sigma_mea in collu_rand attack
+
+mal_index_mode = 'random'; %Index method of malicious vehicles, it can be 'sequential', 'random' or 'custom' (e.g. if total vehicle number is 20, malicious vehicle number is 5, then indeice of malicious vehicle are '1,2,3,4,5' if mode is 'sequential', 5 random number in 1-30 if mode is 'random' or 5 mannually chosen numbers if mode is 'custom')
+
 collu_design_mal_deviation=collu_design_mal_devi_coef*sqrt(var_mea);
 collu_rand_mal_deviation=collu_rand_mal_devi_coef*sqrt(var_mea);
-
-% randAver_times = 20; %Interation number of whole route simulation
 
 size=length(t);
 F=[1 dt 0 0;
@@ -76,10 +64,6 @@ Q1=[0.1 0 0 0;
    0 0 0 0.2];%Noise matrix of movement of Vehicle 1
 
 %% Kalman Filtering
-msex11_=0;
-msev11_=0;
-msexY11_=0;
-msevY11_=0;
 msex_=zeros(1,num_vehicle);
 msev_=zeros(1,num_vehicle);
 
@@ -90,6 +74,7 @@ for i=1:num_filter+2
     All_msex_{i}=zeros(1,num_vehicle);
     All_msev_{i}=zeros(1,num_vehicle);
 end
+
 %Initiate the FP and FN counters
     false_pos_count=zeros(1,num_vehicle);
     false_neg_count=zeros(1,num_vehicle);
@@ -97,11 +82,11 @@ end
 %Beginning of each simulation
 for time = 1:randAver_times
     %Random parameters 
-    u1 = u1+alpha*randn(2,size);
+    u1 = u1+alpha*randn(2,size); %Add noise to control sequence
 
-    w1=sqrt(Q1)*randn(4,size);
-    v11=sqrt(R11)*randn(4,size);
-    v21=cell(1,num_vehicle);
+    w1=sqrt(Q1)*randn(4,size); %State noise
+    v11=sqrt(R11)*randn(4,size); %Self observation noise
+    v21=cell(1,num_vehicle); %Others' observation noise
     for i = 1:num_vehicle
         v21{i}=sqrt(R21)*randn(4,size);
     end
@@ -109,12 +94,14 @@ for time = 1:randAver_times
     %Observation results and groundtruth
     x1=zeros(4,size);% Vehicle 1 groundtruth, four rows are "x position, x speed, y position, y speed".
     x1(:,1)=[1;0;5;0];% The initial start point of vehicle 1 is (1,5)
+
+    %Groundtruth (x1) of movement of target vehicle
     for i=1:(size-1)
         x1(:,i+1)=F*x1(:,i)+B*u1(:,i);
     end
     x1=x1+C*w1;
-    Y11=H1*x1+v11;% Self-observation of vehicle 1
 
+    Y11=H1*x1+v11;% Self-observation of vehicle 1
     Y21=cell(1,num_vehicle);
     for i = 1:num_vehicle
         Y21{i} = H2*x1+v21{i};
@@ -174,11 +161,13 @@ for time = 1:randAver_times
             gt_trust{i}(malicious_index(j))=0;
         end
     end
+
     %Initiate the previous trust table which is updated in sequential detetors
     % prev_trust_table=cell(1,num_vehicle);
     % for j=num_minvehi:num_vehicle
     %     prev_trust_table{j}=ones(1,j);
     % end
+
     %Initialize the total trust values for all other vehicles before each simulation
     total_trust_val=cell(1,num_vehicle);
     for j=num_minvehi:num_vehicle
@@ -337,20 +326,21 @@ for time = 1:randAver_times
         end
         
         %Check the data after adding malicious information
-        xtemp_scatter=zeros(2,num_vehicle);
-        vtemp_scatter=zeros(2,num_vehicle);
-        for j=1:num_vehicle
-        	xtemp_scatter(:,j)=Y21{j}([1,3],i+1);
-        	vtemp_scatter(:,j)=Y21{j}([2,4],i+1);
-        end
+        %-----------------------------------------------------
+        % xtemp_scatter=zeros(2,num_vehicle);
+        % vtemp_scatter=zeros(2,num_vehicle);
+        % for j=1:num_vehicle
+        % 	xtemp_scatter(:,j)=Y21{j}([1,3],i+1);
+        % 	vtemp_scatter(:,j)=Y21{j}([2,4],i+1);
+        % end
         
-        
-%         figure;
-%         scatter(xtemp_scatter(1,:),xtemp_scatter(2,:),'b');
-%         hold on;
-%         scatter(xtemp_scatter(1,malicious_index(1:num_malicious)),xtemp_scatter(2,malicious_index(1:num_malicious)));
+        % figure;
+        % scatter(xtemp_scatter(1,:),xtemp_scatter(2,:),'b');
+        % hold on;
+        % scatter(xtemp_scatter(1,malicious_index(1:num_malicious)),xtemp_scatter(2,malicious_index(1:num_malicious)));
         % figure;
         % scatter(vtemp_scatter(1,:),vtemp_scatter(2,:),'b');
+        %-----------------------------------------------------
 
         %Getting the global estimation without or with filtering
         for j=num_minvehi:num_vehicle
@@ -387,15 +377,15 @@ for time = 1:randAver_times
                 All_X1{5,j}(:,i+1)=X_1{j}(:,i+1);    
             end
             if(strcmp(filter_mode,'SeqMMSE')||strcmp(filter_mode,'Al'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqMMSE",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust,test_index);
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqMMSE",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{6,j}(:,i+1)=X_1{j}(:,i+1); 
             end
             if(strcmp(filter_mode,'Dead_Reckon')||strcmp(filter_mode,'All'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("Dead_Reckon",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust,test_index);
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("Dead_Reckon",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{7,j}(:,i+1)=X_1{j}(:,i+1); 
             end
             if(strcmp(filter_mode,'SeqResE')||strcmp(filter_mode,'All'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqResE",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust,test_index);
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqResE",x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,var_self,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{8,j}(:,i+1)=X_1{j}(:,i+1); 
             end
             if(strcmp(filter_mode,'All_benign')||strcmp(filter_mode,'Al'))
@@ -406,11 +396,11 @@ for time = 1:randAver_times
     end
 
     %Caculate TPR,FPR,TNR,FNR for detection methods
-    false_pos_ratio=false_pos_count/(time*((size-buffer_size+1)*num_vehicle-Mal_time_count*num_malicious));
-    false_neg_ratio=false_neg_count/(time*Mal_time_count*num_malicious);
-    TPR=1-false_neg_ratio(num_vehicle)
-    FPR=false_pos_ratio(num_vehicle)
-    TNR=1-false_pos_ratio(num_vehicle)
+    false_pos_ratio=false_pos_count/(time*((size-buffer_size+1)*num_vehicle-Mal_time_count*num_malicious)); % FPR=FP/N
+    false_neg_ratio=false_neg_count/(time*Mal_time_count*num_malicious); %FNR=FN/P
+    TPR=1-false_neg_ratio(num_vehicle) % TPR=1-FNR
+    FPR=false_pos_ratio(num_vehicle) 
+    TNR=1-false_pos_ratio(num_vehicle) %TNR=1-FPR
     FNR=false_neg_ratio(num_vehicle)
 
     %Caculate the RMSE for each methods
@@ -424,8 +414,8 @@ for time = 1:randAver_times
             for j=num_minvehi:num_vehicle
                 [All_msex{i}(j),All_msev{i}(j)]=MSE(All_X1{i,j}(:,t_),x1(:,t_));
             end
-            All_msex_{i} = All_msex_{i} + All_msex{i};
-            All_msev_{i} = All_msev_{i} + All_msev{i};
+            All_msex_{i} = All_msex_{i} + All_msex{i}; 
+            All_msev_{i} = All_msev_{i} + All_msev{i}; %All_mse_ is the container to accumulate RMSE over different iterations, while All_mse is just the tmp result in each independent simulation.
         end 
     else
         msex=zeros(1,num_vehicle);
@@ -469,15 +459,6 @@ for time = 1:randAver_times
     set(gca,'LooseInset',get(gca,'TightInset'));
     set(gca,'looseInset',[0 0 0 0]);
 
-    %Plot velocity
-%     figure;
-%     hold on;
-%     for i=1:num_filter+2
-%         plot(All_X1{i,num_vehicle}(2,:),All_X1{i,num_vehicle}(4,:));
-%     end
-%     plot(X11(1,:),X11(3,:),'k');
-%     legend('Groundtruth','Without filtering','RML','LMS','MAE','SeqMMSE','Dead Reckon','SeqResE','Self-KF');
-
 end
 %% output
 if(strcmp(filter_mode,'All'))
@@ -500,22 +481,12 @@ if(strcmp(filter_mode,'All'))
 %     for i=2:num_filter+2
         plot(num_minvehi+1:(num_vehicle+1),All_msex_{i}(num_minvehi:num_vehicle),'Linewidth',2)
     end
-    legend('RMSE of position--All Benign','RMSE of position--RML','RMSE of position--MAE','RMSE of position--DMMSD(Proposed)','RMSE of position--MRED(Proposed)');
-    % legend('RMSE of position--Without filtering','RMSE of position--RML','RMSE of position--LMS','RMSE of position--MAE','RMSE of position--SeqMMSE','RMSE of position--Dead Reckon','RMSE of position--SeqResE','RMSE of position--All Benign');
+    legend('RMSE of position--All Benign','RMSE of position--LMS','RMSE of position--MAE','RMSE of position--DMMSD(Proposed)','RMSE of position--MRED(Proposed)');
     xlabel('Number of Vehicles');
     ylabel('RMSE');
     ylim([0 2]);
     set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',10);
 
-%     figure
-%     hold on
-%     grid on
-%     for i=2:num_filter+2
-%         plot(num_minvehi+1:(num_vehicle+1),All_msev_{i}(num_minvehi:num_vehicle))
-%     end
-%     legend('RMSE of speed--Without filtering','RMSE of speed--RML','RMSE of speed--LMS','RMSE of speed--RML+SeqMMSE');
-%     xlabel('Number of Vehicles')
-%     ylabel('RMSE')
 else
     plot(num_minvehi+1:(num_vehicle+1),msex_(num_minvehi:num_vehicle),'b-')
     plot(num_minvehi+1:(num_vehicle+1),msev_(num_minvehi:num_vehicle),'r-')

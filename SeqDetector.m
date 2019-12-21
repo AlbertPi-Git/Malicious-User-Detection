@@ -1,20 +1,6 @@
 %Sequential malicious data detector
-function [State_est,false_pos_count,false_neg_count,total_trust_val] = SeqDetector(mode,x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,Var_mea,Var_self,F,B,ori_u1,total_trust_val,false_pos_count,false_neg_count,gt_trust,test_index)
+function [State_est,false_pos_count,false_neg_count,total_trust_val] = SeqDetector(mode,x1,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,Var_mea,Var_self,F,B,ori_u1,total_trust_val,false_pos_count,false_neg_count,gt_trust)
 	
-    if(i>=buffer_size)
-        % If_Urgent=false;
-        % if(strcmp(mode,"Dead_Reckon"))
-        %     [update_trust_table,If_Urgent]=Dead_Reckon(x1,[DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],i,dt,F,B,ori_u1,Var_mea,Var_self,gt_trust{j}); %Use Multi_Seq detection algorithm
-        % %If_Urgent: when it's 'true', use the current update_trust_table to pick vehicles or use accumulate total trust values
-        % elseif(strcmp(mode,"SeqMMSE"))
-        %     update_trust_table=ARMMSE(DataSeq_buffer,Var_mea,j,0.4); %Use SeqMMSE detection algorithm to update trust table
-        % elseif(strcmp(mode,"SeqResE"))
-        %     update_trust_table=SeqResE(x1,[DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],Var_mea,Var_self,gt_trust{j},2.4);
-        % end
-        % total_trust_val=total_trust_val+update_trust_table; %Accumulate the trust value for each vehicles
-        % false_pos_count=false_pos_count+sum((xor(update_trust_table,gt_trust{j}))&gt_trust{j});  %regard right as wrong
-        % false_neg_count=false_neg_count+sum((xor(update_trust_table,gt_trust{j}))&update_trust_table); %regard wrong as right
-    end
     if(i<buffer_size) %Use a robust filtering algorithm before buffer is ready
         [X_est, P_est]=Array_combination(i,j,X11,P11,X21,P21);
         [pos_ML,vel_ML]=Robust_ML(X_est,P_est);
@@ -27,10 +13,12 @@ function [State_est,false_pos_count,false_neg_count,total_trust_val] = SeqDetect
         elseif(strcmp(mode,"SeqMMSE"))
             update_trust_table=ARMMSE(DataSeq_buffer,Var_mea,j,0.4); %Use SeqMMSE detection algorithm to update trust table
         elseif(strcmp(mode,"SeqResE"))
-            update_trust_table=SeqResE(x1,[DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],Var_mea,Var_self,gt_trust{j},2.4);
+            update_trust_table=SeqResE([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],Var_mea,2.4);
         end
         total_trust_val=total_trust_val+update_trust_table; %Accumulate the trust value for each vehicles
-        false_pos_count=false_pos_count+sum((xor(update_trust_table,gt_trust{j}))&gt_trust{j});  %regard right as wrong
+        false_pos_count=false_pos_count+sum((xor(update_trust_table,gt_trust{j}))&gt_trust{j});  %regard right as wrong, predicted malicious vehicle is 0 in update trust table, beign vehicle is 1
+        %while positive means prediction is 0 in update trust table, so be
+        %careful when compute FP and FN
         false_neg_count=false_neg_count+sum((xor(update_trust_table,gt_trust{j}))&update_trust_table); %regard wrong as right
         trust_table=update_trust_table;
         if(If_Urgent)
