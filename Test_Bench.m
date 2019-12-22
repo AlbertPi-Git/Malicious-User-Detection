@@ -2,10 +2,10 @@ clear;
 
 var_self=16; %Variance of self-observation
 var_mea=16;  %Variance of observations from other vehicles
-mal_var_coef=0.75; %mal_var/var_mea
-num_vehicle=20; % Number of maximun other vehicles observing target vehicle
-num_minvehi=20; % Number of minimum other vehicles in varying vehicle number simulation
-num_malicious = 4; % Number of malicous vehicles
+mal_var_coef=0.75; %variance of malicious observaion/variance of normal observation
+num_vehicle=30; % Number of maximun other vehicles observing target vehicle
+num_minvehi=30; % Number of minimum other vehicles in varying vehicle number simulation
+num_malicious = 8; % Number of malicous vehicles
 % filter_mode='Dead_Reckon';
 % filter_mode='SeqMMSE';
 % filter_mode='SeqResE';
@@ -13,12 +13,11 @@ filter_mode='All';
 space_attack_mode='collu'; %Space attack mode, it can be 'indep' (indepedent) or 'collu' (colluding)
 time_attack_mode = 'long_design'; %Temporal attack mode, it can be 'long design' (trajectory attack), 'long rand' (continuous random) or 'short rand' (impulsing random)
 collu_rand_mal_devi_coef=10;
-collu_design_mal_devi_coef=2; %deviation in cooradinated trajectory attack=collu_design_mal_devi_coef*sqrt(var_mea)
+collu_design_mal_devi_coef=1.5; %deviation in cooradinated trajectory attack=collu_design_mal_devi_coef*sqrt(var_mea)
 buffer_size=16; %Buffer size for sequential detection
-randAver_times = 5; %How many times will the whole simulation be execeuted to get average performance results
-test_index=2.4;
+randAver_times = 1; %How many times will the whole simulation be execeuted to get average performance results
 
-test_content='varying_mali'; %it can be 'varying_mali', 'varying_total', 'collu_rand_devi_sweep', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
+test_content='collu_design_devi_sweep'; %it can be 'varying_mali', 'varying_total', 'collu_rand_devi_sweep', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
 
 %Num_malicious Sweep
 if strcmp(test_content,'varying_mali') % Need to set num_minvehicle and num_vehicle as the same
@@ -48,16 +47,10 @@ if strcmp(test_content,'varying_mali') % Need to set num_minvehicle and num_vehi
     saveas(gca,'varying_mali.pdf','pdf'); 
 end
 
-
-
 %Num_vehicle sweep
 if strcmp(test_content,'varying_total') % Need to set num_minvehicle and num_vehicle differently
-size_test_index=size(test_index,2);
-for i=1:size_test_index
-    [TPR(i),FPR(i),TNR(i),FNR(i)]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,test_index(i),collu_design_mal_devi_coef,collu_rand_mal_devi_coef);
-end
-legend('Trajectory of Ground Truth','Trajectory of LMS','Trajectory of MAE','Trajectory of DMMSD(Proposed)','Trajectory of MRED(Proposed)');
-    
+    KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef);
+    legend('Trajectory of Ground Truth','Trajectory of LMS','Trajectory of MAE','Trajectory of DMMSD(Proposed)','Trajectory of MRED(Proposed)'); 
 end
 
 %Collu_rand devi sweep test
@@ -82,14 +75,13 @@ end
 if strcmp(test_content,'collu_design_devi_sweep')
     space_attack_mode='collu';
     time_attack_mode = 'long_design';
-    mal_var_coef=1;
-    collu_design_mal_devi_coef=2.2:0.4:4.2;
+    collu_design_mal_devi_coef=0.8:0.2:2.2;
     % collu_design_mal_devi_coef=[0.7293 0.9481 1.0940 1.2399 1.3128 1.4586 1.8233 2.1880];
     size_design_devi=size(collu_design_mal_devi_coef,2);
     for i=1:size_design_devi
         [TPR_CDDevi(1,i),FPR_CDDevi(1,i),TNR_CDDevi(1,i),FNR_CDDevi(1,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'SeqMMSE',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1);
-    %     [TPR_CDDevi(2,i),FPR_CDDevi(2,i),TNR_CDDevi(2,i),FNR_CDDevi(2,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'Dead_Reckon',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1);
-    %     [TPR_CDDevi(3,i),FPR_CDDevi(3,i),TNR_CDDevi(3,i),FNR_CDDevi(3,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'SeqResE',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1);
+        [TPR_CDDevi(2,i),FPR_CDDevi(2,i),TNR_CDDevi(2,i),FNR_CDDevi(2,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'Dead_Reckon',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1);
+%         [TPR_CDDevi(3,i),FPR_CDDevi(3,i),TNR_CDDevi(3,i),FNR_CDDevi(3,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'SeqResE',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1);
     end
 
     figure;
@@ -97,11 +89,11 @@ if strcmp(test_content,'collu_design_devi_sweep')
     grid on;
     box on;
     plot(collu_design_mal_devi_coef,TPR_CDDevi(1,:),'--o','Linewidth',2.5,'Markersize',8);
-    % plot(collu_design_mal_devi_coef,TPR_CDDevi(2,:),'-.*','Linewidth',2.5,'Markersize',12);
-    % plot(collu_design_mal_devi_coef,TPR_CDDevi(3,:),'-x','Linewidth',2.5,'Markersize',12);
+    plot(collu_design_mal_devi_coef,TPR_CDDevi(2,:),'-.*','Linewidth',2.5,'Markersize',12);
+%     plot(collu_design_mal_devi_coef,TPR_CDDevi(3,:),'-x','Linewidth',2.5,'Markersize',12);
     plot(collu_design_mal_devi_coef,FPR_CDDevi(1,:),'--o','Linewidth',2.5,'Markersize',8);
-    % plot(collu_design_mal_devi_coef,FPR_CDDevi(2,:),'-.*','Linewidth',2.5,'Markersize',12);
-    % plot(collu_design_mal_devi_coef,FPR_CDDevi(3,:),'-x','Linewidth',2.5,'Markersize',12);
+    plot(collu_design_mal_devi_coef,FPR_CDDevi(2,:),'-.*','Linewidth',2.5,'Markersize',12);
+%     plot(collu_design_mal_devi_coef,FPR_CDDevi(3,:),'-x','Linewidth',2.5,'Markersize',12);
     xlabel('collu\_design\_mal\_devi\_coef /Sigma_{mea}');
     legend('TPR of SeqMMSE','TPR of DMMSD(Proposed)','TPR of MRED(Proposed)','FPR of SeqMMSE','FPR of DMMSD(Proposed)','FPR of MRED(Proposed)');
     set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',20);
@@ -112,7 +104,7 @@ end
 if strcmp(test_content,'collu_design_var_sweep')
     space_attack_mode='collu';
     time_attack_mode = 'long_design';
-    collu_design_mal_devi_coef=1;
+    collu_design_mal_devi_coef=1.5;
     mal_var_coef=0.5:0.1:1.5;
     size_design_var=size(mal_var_coef,2);
     for i=1:size_design_var

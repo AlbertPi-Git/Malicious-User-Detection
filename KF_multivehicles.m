@@ -428,36 +428,33 @@ for time = 1:randAver_times
     end
     
     %Plot the estimated trajectories of each methods
-    figure;
-    hold on;
-    grid on;
-    box on;
-    % for i=1:num_filter+2
-    %     plot(All_X1{i,num_vehicle}(1,:),All_X1{i,num_vehicle}(3,:));
-    % end
-    for i=[1 4 5 7 8]
-        if(i==4||i==5)
-            lineshape='--';
-            linewidth=1;
-        elseif(i==7||i==8)
-            lineshape='-.';
-            linewidth=1.5;
-        elseif(i==1)
-            lineshape='-';
-            linewidth=1.5;
-        end
-        plot(All_X1{i,num_vehicle}(1,20:size),All_X1{i,num_vehicle}(3,20:size),lineshape,'Linewidth',linewidth);
-    end
-    % plot(X11(1,:),X11(3,:),'k');
-    xlim([20 550]);
-    ylim([4 25]);
-    title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', Total:' num2str(num_vehicle) ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
-    xlabel('X direction (m)','Fontsize',20);
-    ylabel('Y direction (m)','Fontsize',20);
-    legend('Groundtruth','LMS','MAE','DMMSD(Proposed)','MRED(Proposed)');
-    set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',17);
-    set(gca,'LooseInset',get(gca,'TightInset'));
-    set(gca,'looseInset',[0 0 0 0]);
+%     figure;
+%     hold on;
+%     grid on;
+%     box on;
+%     for i=[1 4 5 7 8]
+%         if(i==4||i==5)
+%             lineshape='--';
+%             linewidth=1;
+%         elseif(i==7||i==8)
+%             lineshape='-.';
+%             linewidth=1.5;
+%         elseif(i==1)
+%             lineshape='-';
+%             linewidth=1.5;
+%         end
+%         plot(All_X1{i,num_vehicle}(1,20:size),All_X1{i,num_vehicle}(3,20:size),lineshape,'Linewidth',linewidth);
+%     end
+%     % plot(X11(1,:),X11(3,:),'k');
+%     xlim([20 550]);
+%     ylim([4 25]);
+%     title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', Total:' num2str(num_vehicle) ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
+%     xlabel('X direction (m)','Fontsize',20);
+%     ylabel('Y direction (m)','Fontsize',20);
+%     legend('Groundtruth','LMS','MAE','DMMSD(Proposed)','MRED(Proposed)');
+%     set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',17);
+%     set(gca,'LooseInset',get(gca,'TightInset'));
+%     set(gca,'looseInset',[0 0 0 0]);
 
 end
 %% output
@@ -471,29 +468,29 @@ else
     msev_ = msev_ ./ randAver_times;
 end
 
-figure
-    title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
-hold on
-box on
-grid on
-if(strcmp(filter_mode,'All'))
-    for i=[9 4 5 7 8]
-%     for i=2:num_filter+2
-        plot(num_minvehi+1:(num_vehicle+1),All_msex_{i}(num_minvehi:num_vehicle),'Linewidth',2)
-    end
-    legend('RMSE of position--All Benign','RMSE of position--LMS','RMSE of position--MAE','RMSE of position--DMMSD(Proposed)','RMSE of position--MRED(Proposed)');
-    xlabel('Number of Vehicles');
-    ylabel('RMSE');
-    ylim([0 2]);
-    set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',10);
-
-else
-    plot(num_minvehi+1:(num_vehicle+1),msex_(num_minvehi:num_vehicle),'b-')
-    plot(num_minvehi+1:(num_vehicle+1),msev_(num_minvehi:num_vehicle),'r-')
-    legend('RMSE of position','RMSE of speed');
-    xlabel('Number of Vehicles')
-    ylabel('RMSE')
-end
+% figure
+%     title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
+% hold on
+% box on
+% grid on
+% if(strcmp(filter_mode,'All'))
+%     for i=[9 4 5 7 8]
+% %     for i=2:num_filter+2
+%         plot(num_minvehi+1:(num_vehicle+1),All_msex_{i}(num_minvehi:num_vehicle),'Linewidth',2)
+%     end
+%     legend('RMSE of position--All Benign','RMSE of position--LMS','RMSE of position--MAE','RMSE of position--DMMSD(Proposed)','RMSE of position--MRED(Proposed)');
+%     xlabel('Number of Vehicles');
+%     ylabel('RMSE');
+%     ylim([0 2]);
+%     set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',10);
+% 
+% else
+%     plot(num_minvehi+1:(num_vehicle+1),msex_(num_minvehi:num_vehicle),'b-')
+%     plot(num_minvehi+1:(num_vehicle+1),msev_(num_minvehi:num_vehicle),'r-')
+%     legend('RMSE of position','RMSE of speed');
+%     xlabel('Number of Vehicles')
+%     ylabel('RMSE')
+% end
 
 end
 
