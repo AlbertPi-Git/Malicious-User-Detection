@@ -1,5 +1,5 @@
 % Multi-vehicles Attack-resistant Cooperative Tracking
-function [RMSE,TPR,FPR,TNR,FNR]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode)
+function [RMSE,TPR,FPR,TNR,FNR]=CoopTracking_MalDetection(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode)
 %% Set parameters
 
 dt=0.1; %Measurement interval of self and other observations
