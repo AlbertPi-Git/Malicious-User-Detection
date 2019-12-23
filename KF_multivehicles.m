@@ -322,7 +322,7 @@ for time = 1:randAver_times
                 All_X1{8,j}(:,i+1)=X_1{j}(:,i+1); 
             end
             if(strcmp(filter_mode,'All_benign')||strcmp(filter_mode,'Al'))
- 
+                %Doesn't need to do anything, 'All_benign' result has been saved in All_X1{9,}
             end
         end
         

@@ -21,7 +21,8 @@ test_mode='oneshot'; %it can be 'oneshot', 'varying_mali', 'varying_total', 'col
 
 %Simple oneshot test, no parameter sweeping, use it to get trajectory estimations of all algorithms
 if strcmp(test_mode,'oneshot')
-    num_minvehil=num_vehicle;
+    num_minvehil=num_vehicle; %vehicle number is fixed
+    randAver_times = 1; %No need to average
     KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode);
 end
 
@@ -60,24 +61,6 @@ end
 %Num_vehicle sweep
 if strcmp(test_mode,'varying_total') % Need to set num_minvehicle and num_vehicle differently
     KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode); 
-end
-
-%Collu_rand devi sweep test
-if strcmp(test_mode,'collu_rand_devi_sweep')
-    attack_mode = 'collu_rand';
-    collu_rand_mal_devi_coef=5:1:15;
-    size_rand_devi=size(collu_rand_mal_devi_coef,2);
-    for i=1:size_rand_devi
-        [TPR(i),FPR(i),TNR(i),FNR(i)]=KF_multivehicles(var_self,var_mea,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,attack_mode,randAver_times,1,collu_rand_mal_devi_coef(i));
-    end
-
-    figure;
-    hold on;
-    grid on;
-    plot(collu_rand_mal_devi_coef,TPR);
-    plot(collu_rand_mal_devi_coef,FPR);
-    xlabel('collu\_rand\_mal\_devi\_coef /Sigma_{mea}');
-    legend('TPR','FPR');
 end
 
 %Collu_design devi sweep test
