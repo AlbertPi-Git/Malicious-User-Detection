@@ -380,12 +380,12 @@ for time = 1:randAver_times
                 [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqMMSE",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{6,j}(:,i+1)=X_1{j}(:,i+1); 
             end
-            if(strcmp(filter_mode,'Dead_Reckon')||strcmp(filter_mode,'All'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("Dead_Reckon",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
+            if(strcmp(filter_mode,'DMMSD')||strcmp(filter_mode,'All'))
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("DMMSD",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{7,j}(:,i+1)=X_1{j}(:,i+1); 
             end
-            if(strcmp(filter_mode,'SeqResE')||strcmp(filter_mode,'All'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqResE",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
+            if(strcmp(filter_mode,'MRED')||strcmp(filter_mode,'All'))
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("MRED",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{8,j}(:,i+1)=X_1{j}(:,i+1); 
             end
             if(strcmp(filter_mode,'All_benign')||strcmp(filter_mode,'Al'))

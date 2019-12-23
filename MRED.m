@@ -1,6 +1,6 @@
 %Sequential Residual Error Average algorithm
 
-function  [trust_table,If_Urgent]=SeqResE(Buffer,Var_mea,Res_index)
+function  [trust_table,If_Urgent]=MRED(Buffer,Var_mea,Res_index)
 
     buffer_size=size(Buffer{1},2); %Buffer size of buffer data
     total_vehicle=size(Buffer,2); %Include the target vehicle itself

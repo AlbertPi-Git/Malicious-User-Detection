@@ -7,13 +7,13 @@ function [State_est,false_pos_count,false_neg_count,total_trust_val] = SeqDetect
         State_est=[pos_ML(1);vel_ML(1);pos_ML(2);vel_ML(2)];
     else %Use the optimal combination when buffer is full and detection is done
         If_Urgent=false;
-        if(strcmp(mode,"Dead_Reckon"))
+        if(strcmp(mode,"DMMSD"))
             [update_trust_table,If_Urgent]=DMMSD([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],i,dt,F,B,ori_u1,Var_mea); %Use Multi_Seq detection algorithm
         %If_Urgent: when it's 'true', use the current update_trust_table to pick vehicles or use accumulate total trust values
         elseif(strcmp(mode,"SeqMMSE"))
             update_trust_table=ARMMSE(DataSeq_buffer,Var_mea,j,0.4); %Use SeqMMSE detection algorithm to update trust table
-        elseif(strcmp(mode,"SeqResE"))
-            update_trust_table=SeqResE([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],Var_mea,2.4);
+        elseif(strcmp(mode,"MRED"))
+            update_trust_table=MRED([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],Var_mea,2.4);
         end
         total_trust_val=total_trust_val+update_trust_table; %Accumulate the trust value for each vehicles
         false_pos_count=false_pos_count+sum((xor(update_trust_table,gt_trust{j}))&gt_trust{j});  %regard right as wrong, predicted malicious vehicle is 0 in update trust table, beign vehicle is 1
