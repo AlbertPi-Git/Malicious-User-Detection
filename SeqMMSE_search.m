@@ -1,6 +1,6 @@
 %Recursive search function
 %This is not the original version, it's added with self-estimation 
-function trust_table = ARMMSE_search(pos,var_mea,trust_table,cdf_index)
+function trust_table = SeqMMSE_search(pos,var_mea,trust_table,cdf_index)
 
 	total_vehicle=size(pos{1},2);
 	other_vehicle=total_vehicle-1;

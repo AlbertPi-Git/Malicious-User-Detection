@@ -1,6 +1,6 @@
 %Sequential MMSE detector
 %This is not the original version, it's added with self-estimation 
-function pos_trust_table = ARMMSE(Buffer,var_mea,total_vehicle,cdf_index) 
+function pos_trust_table = SeqMMSE(Buffer,var_mea,total_vehicle,cdf_index) 
 %Input: Buffer of sequential ARMMSE detector, variance of observation of other results
 %Output: Trust table of all vehicles except vehicle 1 itself
 
@@ -18,6 +18,6 @@ function pos_trust_table = ARMMSE(Buffer,var_mea,total_vehicle,cdf_index)
 		end
 	end %Convert the buffered data from vehicle index based cell to buffer dim based cell
 	pos_trust_table=zeros(1,total_vehicle);
-	pos_trust_table=ARMMSE_search(pos,var_mea,pos_trust_table,cdf_index); %Use the recursive function to find the trust value of each vehicle
+	pos_trust_table=SeqMMSE_search(pos,var_mea,pos_trust_table,cdf_index); %Use the recursive function to find the trust value of each vehicle
     
 end

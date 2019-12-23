@@ -11,7 +11,7 @@ function [State_est,false_pos_count,false_neg_count,total_trust_val] = SeqDetect
             [update_trust_table,If_Urgent]=DMMSD([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],i,dt,F,B,ori_u1,Var_mea); %Use Multi_Seq detection algorithm
         %If_Urgent: when it's 'true', use the current update_trust_table to pick vehicles or use accumulate total trust values
         elseif(strcmp(mode,"SeqMMSE"))
-            update_trust_table=ARMMSE(DataSeq_buffer,Var_mea,j,0.4); %Use SeqMMSE detection algorithm to update trust table
+            update_trust_table=SeqMMSE(DataSeq_buffer,Var_mea,j,0.4); %Use SeqMMSE detection algorithm to update trust table
         elseif(strcmp(mode,"MRED"))
             update_trust_table=MRED([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],Var_mea,2.4);
         end
