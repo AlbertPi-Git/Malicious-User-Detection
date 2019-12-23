@@ -1,5 +1,5 @@
 % Multi-vehicles Attack-resistant Cooperative Tracking
-function [TPR,FPR,TNR,FNR]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef)
+function [TPR,FPR,TNR,FNR]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode)
 %% Set parameters
 
 dt=0.1; %Measurement interval of self and other observations
@@ -166,7 +166,7 @@ for time = 1:randAver_times
         total_trust_val{j}=zeros(1,j);
     end
 
-
+    %Before adding some malicious deviation to assumed malicious data, compute the estimation when all vehicles are benign to use in the performance comparison.
     for i=1:(size-1)
         % 1-1
         X11_ = F*X11(:,i)+B*u1(:,i);
@@ -200,10 +200,7 @@ for time = 1:randAver_times
     end
 
 
-
-
-
-    %Kalman filter and malicious detecting & filtering  
+    %Add malicious deviation and do kalman filter and malicious user filtering  
     for i=1:(size-1)
         if(i<buffer_size)
             Mal_time_count=0; %Count how many times malicious attack occur after buffer_size if reached
@@ -277,25 +274,8 @@ for time = 1:randAver_times
                 DataSeq_buffer{k}=[temp_buffer, Y21{k}(:,i+1)];
             end  
         end
-        
-        %Check the data after adding malicious information
-        %-----------------------------------------------------
-        % xtemp_scatter=zeros(2,num_vehicle);
-        % vtemp_scatter=zeros(2,num_vehicle);
-        % for j=1:num_vehicle
-        % 	xtemp_scatter(:,j)=Y21{j}([1,3],i+1);
-        % 	vtemp_scatter(:,j)=Y21{j}([2,4],i+1);
-        % end
-        
-        % figure;
-        % scatter(xtemp_scatter(1,:),xtemp_scatter(2,:),'b');
-        % hold on;
-        % scatter(xtemp_scatter(1,malicious_index(1:num_malicious)),xtemp_scatter(2,malicious_index(1:num_malicious)));
-        % figure;
-        % scatter(vtemp_scatter(1,:),vtemp_scatter(2,:),'b');
-        %-----------------------------------------------------
 
-        %Getting the global estimation without or with filtering
+        %Get the global estimation without or with filtering
         for j=num_minvehi:num_vehicle
             if(strcmp(filter_mode,'None')||strcmp(filter_mode,'Al')) %Without filtering
                 Pg=eye(4)/P11;
@@ -351,10 +331,11 @@ for time = 1:randAver_times
     %Caculate TPR,FPR,TNR,FNR for detection methods
     false_pos_ratio=false_pos_count/(time*((size-buffer_size+1)*num_vehicle-Mal_time_count*num_malicious)); % FPR=FP/N
     false_neg_ratio=false_neg_count/(time*Mal_time_count*num_malicious); %FNR=FN/P
-    TPR=1-false_neg_ratio(num_vehicle) % TPR=1-FNR
-    FPR=false_pos_ratio(num_vehicle) 
-    TNR=1-false_pos_ratio(num_vehicle) %TNR=1-FPR
-    FNR=false_neg_ratio(num_vehicle)
+    TPR=1-false_neg_ratio(num_vehicle); % TPR=1-FNR
+    FPR=false_pos_ratio(num_vehicle); 
+    TNR=1-false_pos_ratio(num_vehicle); %TNR=1-FPR
+    FNR=false_neg_ratio(num_vehicle);
+    disp("TPR is: "+num2str(TPR)+", FPR is: "+num2str(FPR)+", TNR is: "+num2str(TNR)+", FNR is: "+num2str(FNR));
 
     %Caculate the RMSE for each methods
     t_=10:size;
@@ -380,35 +361,36 @@ for time = 1:randAver_times
         msev_ = msev_ + msev; 
     end
     
-    %Plot the estimated trajectories of each methods
-%     figure;
-%     hold on;
-%     grid on;
-%     box on;
-%     for i=[1 4 5 7 8]
-%         if(i==4||i==5)
-%             lineshape='--';
-%             linewidth=1;
-%         elseif(i==7||i==8)
-%             lineshape='-.';
-%             linewidth=1.5;
-%         elseif(i==1)
-%             lineshape='-';
-%             linewidth=1.5;
-%         end
-%         plot(All_X1{i,num_vehicle}(1,20:size),All_X1{i,num_vehicle}(3,20:size),lineshape,'Linewidth',linewidth);
-%     end
-%     % plot(X11(1,:),X11(3,:),'k');
-%     xlim([20 550]);
-%     ylim([4 25]);
-%     title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', Total:' num2str(num_vehicle) ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
-%     xlabel('X direction (m)','Fontsize',20);
-%     ylabel('Y direction (m)','Fontsize',20);
-%     legend('Groundtruth','LMS','MAE','DMMSD(Proposed)','MRED(Proposed)');
-%     set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',17);
-%     set(gca,'LooseInset',get(gca,'TightInset'));
-%     set(gca,'looseInset',[0 0 0 0]);
-
+    if strcmp(test_mode,'single_test')
+        % Plot the estimated trajectories of each methods
+        figure;
+        hold on;
+        grid on;
+        box on;
+        for i=[1 4 5 7 8]
+            if(i==4||i==5)
+                lineshape='--';
+                linewidth=1;
+            elseif(i==7||i==8)
+                lineshape='-.';
+                linewidth=1.5;
+            elseif(i==1)
+                lineshape='-';
+                linewidth=1.5;
+            end
+            plot(All_X1{i,num_vehicle}(1,20:size),All_X1{i,num_vehicle}(3,20:size),lineshape,'Linewidth',linewidth);
+        end
+        % plot(X11(1,:),X11(3,:),'k');
+        xlim([20 550]);
+        ylim([4 25]);
+        title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', Total:' num2str(num_vehicle) ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
+        xlabel('X direction (m)','Fontsize',20);
+        ylabel('Y direction (m)','Fontsize',20);
+        legend('Groundtruth','LMS','MAE','DMMSD(Proposed)','MRED(Proposed)');
+        set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',17);
+        set(gca,'LooseInset',get(gca,'TightInset'));
+        set(gca,'looseInset',[0 0 0 0]);
+    end
 end
 %% output
 if(strcmp(filter_mode,'All'))
@@ -421,29 +403,30 @@ else
     msev_ = msev_ ./ randAver_times;
 end
 
-% figure
-%     title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
-% hold on
-% box on
-% grid on
-% if(strcmp(filter_mode,'All'))
-%     for i=[9 4 5 7 8]
-% %     for i=2:num_filter+2
-%         plot(num_minvehi+1:(num_vehicle+1),All_msex_{i}(num_minvehi:num_vehicle),'Linewidth',2)
-%     end
-%     legend('RMSE of position--All Benign','RMSE of position--LMS','RMSE of position--MAE','RMSE of position--DMMSD(Proposed)','RMSE of position--MRED(Proposed)');
-%     xlabel('Number of Vehicles');
-%     ylabel('RMSE');
-%     ylim([0 2]);
-%     set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',10);
-% 
-% else
-%     plot(num_minvehi+1:(num_vehicle+1),msex_(num_minvehi:num_vehicle),'b-')
-%     plot(num_minvehi+1:(num_vehicle+1),msev_(num_minvehi:num_vehicle),'r-')
-%     legend('RMSE of position','RMSE of speed');
-%     xlabel('Number of Vehicles')
-%     ylabel('RMSE')
-% end
+if strcmp(test_mode,'varying_total')
+    figure
+        title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
+    hold on
+    box on
+    grid on
+    if(strcmp(filter_mode,'All'))
+        for i=[9 4 5 7 8]
+            plot(num_minvehi+1:(num_vehicle+1),All_msex_{i}(num_minvehi:num_vehicle),'Linewidth',2)
+        end
+        legend('RMSE of position--All Benign','RMSE of position--LMS','RMSE of position--MAE','RMSE of position--DMMSD(Proposed)','RMSE of position--MRED(Proposed)');
+        xlabel('Number of Vehicles');
+        ylabel('RMSE');
+        ylim([0 2]);
+        set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',10);
+    
+    else
+        plot(num_minvehi+1:(num_vehicle+1),msex_(num_minvehi:num_vehicle),'b-')
+        plot(num_minvehi+1:(num_vehicle+1),msev_(num_minvehi:num_vehicle),'r-')
+        legend('RMSE of position','RMSE of speed');
+        xlabel('Number of Vehicles')
+        ylabel('RMSE')
+    end
+end
 
 end
 
