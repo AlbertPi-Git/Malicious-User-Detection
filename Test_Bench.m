@@ -2,7 +2,7 @@ clear;
 
 var_self=16; %Variance of self-observation
 var_mea=16;  %Variance of observations from other vehicles
-mal_var_coef=0.75; %variance of malicious observaion/variance of normal observation
+mal_var_coef=0.8; %variance of malicious observaion/variance of normal observation
 num_vehicle=20; % Number of maximun other vehicles observing target vehicle
 num_minvehi=20; % Number of minimum other vehicles in varying vehicle number simulation
 num_malicious = 8; % Number of malicous vehicles
@@ -17,7 +17,13 @@ collu_design_mal_devi_coef=1.5; %deviation in cooradinated trajectory attack=col
 buffer_size=16; %Buffer size for sequential detection
 randAver_times = 1; %How many times will the whole simulation be execeuted to get average performance results
 
-test_mode='collu_design_devi_sweep'; %it can be 'varying_mali', 'varying_total', 'collu_rand_devi_sweep', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
+test_mode='oneshot'; %it can be 'oneshot', 'varying_mali', 'varying_total', 'collu_rand_devi_sweep', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
+
+%Simple oneshot test, no parameter sweeping, use it to get trajectory estimations of all algorithms
+if strcmp(test_mode,'oneshot')
+    num_minvehil=num_vehicle;
+    KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode);
+end
 
 %Num_malicious Sweep
 if strcmp(test_mode,'varying_mali') % Need to set num_minvehicle and num_vehicle as the same
@@ -44,18 +50,16 @@ if strcmp(test_mode,'varying_mali') % Need to set num_minvehicle and num_vehicle
     xlabel('Number of malicious vehicles','fontsize',20);
     ylabel('RMSE (m)','fontsize',20);
     ylim([0.4 2.2]);
-    set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',16);
+    set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',14);
     set(gca,'LooseInset',get(gca,'TightInset'));
     set(gca,'looseInset',[0 0 0 0]);
     set(gcf, 'PaperPosition', [-0.75 0.2 26.5 26]);
     set(gcf, 'PaperSize', [30 30]);
-    saveas(gca,'varying_mali.pdf','pdf'); 
 end
 
 %Num_vehicle sweep
 if strcmp(test_mode,'varying_total') % Need to set num_minvehicle and num_vehicle differently
-    KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode);
-    legend('Trajectory of Ground Truth','Trajectory of LMS','Trajectory of MAE','Trajectory of DMMSD(Proposed)','Trajectory of MRED(Proposed)'); 
+    KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode); 
 end
 
 %Collu_rand devi sweep test
@@ -98,16 +102,21 @@ if strcmp(test_mode,'collu_design_devi_sweep')
     hold on;
     grid on;
     box on;
-    plot(collu_design_mal_devi_coef,TPR_Devi(1,:),'--o','Linewidth',2.5,'Markersize',8);
-    plot(collu_design_mal_devi_coef,TPR_Devi(2,:),'-.*','Linewidth',2.5,'Markersize',12);
-    plot(collu_design_mal_devi_coef,TPR_Devi(3,:),'-x','Linewidth',2.5,'Markersize',12);
-    plot(collu_design_mal_devi_coef,FPR_Devi(1,:),'--s','Linewidth',2.5,'Markersize',9);
-    plot(collu_design_mal_devi_coef,FPR_Devi(2,:),'-.d','Linewidth',2.5,'Markersize',9);
-    plot(collu_design_mal_devi_coef,FPR_Devi(3,:),'-^','Linewidth',2.5,'Markersize',9);
-    xlabel('collu\_design\_mal\_devi\_coef /Sigma_{mea}');
+    plot(collu_design_mal_devi_coef.*sqrt(var_mea),TPR_Devi(1,:),'--o','Linewidth',2.5,'Markersize',8);
+    plot(collu_design_mal_devi_coef.*sqrt(var_mea),TPR_Devi(2,:),'-.*','Linewidth',2.5,'Markersize',12);
+    plot(collu_design_mal_devi_coef.*sqrt(var_mea),TPR_Devi(3,:),'-x','Linewidth',2.5,'Markersize',12);
+    plot(collu_design_mal_devi_coef.*sqrt(var_mea),FPR_Devi(1,:),'--s','Linewidth',2.5,'Markersize',9);
+    plot(collu_design_mal_devi_coef.*sqrt(var_mea),FPR_Devi(2,:),'-.d','Linewidth',2.5,'Markersize',9);
+    plot(collu_design_mal_devi_coef.*sqrt(var_mea),FPR_Devi(3,:),'-^','Linewidth',2.5,'Markersize',9);
+    xlabel('Malicious deviation in Y direction (m)','Fontsize',20);
+    ylabel('TPR & FPR','Fontsize',20);
     legend('TPR of SeqMMSE','TPR of DMMSD(Proposed)','TPR of MRED(Proposed)','FPR of SeqMMSE','FPR of DMMSD(Proposed)','FPR of MRED(Proposed)');
-    set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',20);
     title(['Attack\_mode: ' time_attack_mode  ', Total:' num2str(num_vehicle) ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea)  ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
+    set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',14);
+    set(gca,'LooseInset',get(gca,'TightInset'));
+    set(gca,'looseInset',[0 0 0 0]);
+    set(gcf, 'PaperPosition', [-0.75 0.2 26.5 26]);
+    set(gcf, 'PaperSize', [30 30]);
 end
 
 %Collu_design Var sweep test
@@ -138,8 +147,13 @@ if strcmp(test_mode,'collu_design_var_sweep')
     plot(mal_var_coef,FPR_Var(1,:),'--s','Linewidth',2.5,'Markersize',9);
     plot(mal_var_coef,FPR_Var(2,:),'-.d','Linewidth',2.5,'Markersize',9);
     plot(mal_var_coef,FPR_Var(3,:),'-^','Linewidth',2.5,'Markersize',9);
-    xlabel('collu\_design\_mal\_var\_coef /Var\_mea');
+    xlabel('Variance of malicious observations','Fontsize',20);
+    ylabel('TPR & FPR','Fontsize',20);
     legend('TPR of SeqMMSE','TPR of DMMSD(Proposed)','TPR of MRED(Proposed)','FPR of SeqMMSE','FPR of DMMSD(Proposed)','FPR of MRED(Proposed)');
-    set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',10);
     title(['Attack\_mode: ' time_attack_mode  ', Total:' num2str(num_vehicle) ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', Mal\_Devi:' num2str(collu_design_mal_devi_coef)  ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
+    set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',14);
+    set(gca,'LooseInset',get(gca,'TightInset'));
+    set(gca,'looseInset',[0 0 0 0]);
+    set(gcf, 'PaperPosition', [-0.75 0.2 26.5 26]);
+    set(gcf, 'PaperSize', [30 30]);
 end
