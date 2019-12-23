@@ -34,7 +34,8 @@ function  [trust_table,If_Urgent]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
     for i=1:num_len
         len=Seq_len(i);
         New_Variance=Var_mea*(6+(len-1)*(2*len-1)*dt^2)/(6*len);
-        flag=MMSE_check(Aver_state{i}([1,3],1:total_vehicle-1),0.4,New_Variance); %Self-estimation is not included in this check
+        cdf_index=0.38;
+        flag=MMSE_check(Aver_state{i}([1,3],1:total_vehicle-1),cdf_index,New_Variance); %Self-estimation is not included in this check
         if(flag) 
             cluster_id{i}=kmeans(Aver_pos{i},2);
             seq_honest_id=mode(cluster_id{i});  %Cluster with more vehicles are assumed to be honest

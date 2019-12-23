@@ -13,14 +13,15 @@ Organization hierarchy of all .m files is shown below:
 
 Test_Bench.m <br>
 --> CoopTracking_MalDetection.m <br>
+&emsp;&emsp;--> LMS.m <br>
+&emsp;&emsp;--> MAE.m <br>
 &emsp;&emsp;--> SeqDetector.m <br>
 &emsp;&emsp;&emsp;&emsp;--> SeqMMSE.m <br>
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;-->SeqMMSE_search.m <br>
 &emsp;&emsp;&emsp;&emsp;--> DMMSD.m <br>
 &emsp;&emsp;&emsp;&emsp;--> MRED.m <br>
 &emsp;&emsp;&emsp;&emsp;-->Robust_ML.m <br>
-&emsp;&emsp;--> LMS.m <br>
-&emsp;&emsp;--> MAE.m <br>
+
 
 Test_Bench.m  is the main entrance where you can set all parameters of simulation. (e.g. variance of observations, number of cooperative vehicles, number of malicious vehicles, test mode and so on.)
 

@@ -3,8 +3,8 @@ clear;
 var_self=16; %Variance of self-observation
 var_mea=16;  %Variance of observations from other vehicles
 mal_var_coef=0.75; %variance of malicious observaion/variance of normal observation
-num_vehicle=20; % Number of maximun other vehicles observing target vehicle
-num_minvehi=20; % Number of minimum other vehicles in varying vehicle number simulation
+num_vehicle=30; % Number of maximun other vehicles observing target vehicle
+num_minvehi=30; % Number of minimum other vehicles in varying vehicle number simulation
 num_malicious = 8; % Number of malicous vehicles
 % filter_mode='Dead_Reckon';
 % filter_mode='SeqMMSE';
@@ -15,9 +15,9 @@ time_attack_mode = 'long_design'; %Temporal attack mode, it can be 'long design'
 collu_rand_mal_devi_coef=10;
 collu_design_mal_devi_coef=1.5; %deviation in cooradinated trajectory attack=collu_design_mal_devi_coef*sqrt(var_mea)
 buffer_size=16; %Buffer size for sequential detection
-randAver_times = 1; %How many times will the whole simulation be execeuted to get average performance results
+randAver_times = 5; %How many times will the whole simulation be execeuted to get average performance results
 
-test_mode='collu_design_devi_sweep'; %it can be 'oneshot', 'varying_mali', 'varying_total', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
+test_mode='varying_mali'; %it can be 'oneshot', 'varying_mali', 'varying_total', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
 
 %Simple oneshot test, no parameter sweeping, use it to get trajectory estimations of all algorithms
 if strcmp(test_mode,'oneshot')

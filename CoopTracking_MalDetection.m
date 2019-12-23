@@ -317,7 +317,7 @@ for time = 1:randAver_times
                 [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("DMMSD",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{7,j}(:,i+1)=X_1{j}(:,i+1); 
             end
-            if(strcmp(filter_mode,'MRED')||strcmp(filter_mode,'All'))
+            if(strcmp(filter_mode,'MRED')||strcmp(filter_mode,'Al'))
                 [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("MRED",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
                 All_X1{8,j}(:,i+1)=X_1{j}(:,i+1); 
             end
