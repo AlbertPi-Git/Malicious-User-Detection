@@ -1,5 +1,5 @@
 % Multi-vehicles Attack-resistant Cooperative Tracking
-function [TPR,FPR,TNR,FNR]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode)
+function [RMSE,TPR,FPR,TNR,FNR]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode)
 %% Set parameters
 
 dt=0.1; %Measurement interval of self and other observations
@@ -361,7 +361,7 @@ for time = 1:randAver_times
         msev_ = msev_ + msev; 
     end
     
-    if strcmp(test_mode,'single_test')
+    if strcmp(test_mode,'single')
         % Plot the estimated trajectories of each methods
         figure;
         hold on;
@@ -380,7 +380,6 @@ for time = 1:randAver_times
             end
             plot(All_X1{i,num_vehicle}(1,20:size),All_X1{i,num_vehicle}(3,20:size),lineshape,'Linewidth',linewidth);
         end
-        % plot(X11(1,:),X11(3,:),'k');
         xlim([20 550]);
         ylim([4 25]);
         title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', Total:' num2str(num_vehicle) ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
@@ -402,6 +401,13 @@ else
     msex_ = msex_ ./ randAver_times;
     msev_ = msev_ ./ randAver_times;
 end
+
+%In terms of RMSE, we only compare the performance of 'All Benign', 'LMS', 'MAE', 'DMMSD' and 'MRED', so only part of RMSE are recorded
+RMSE(1)=All_msex_{9}(num_vehicle);
+RMSE(2)=All_msex_{4}(num_vehicle);
+RMSE(3)=All_msex_{5}(num_vehicle);
+RMSE(4)=All_msex_{7}(num_vehicle);
+RMSE(5)=All_msex_{8}(num_vehicle);
 
 if strcmp(test_mode,'varying_total')
     figure
