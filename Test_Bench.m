@@ -2,7 +2,7 @@ clear;
 
 var_self=16; %Variance of self-observation
 var_mea=16;  %Variance of observations from other vehicles
-mal_var_coef=0.8; %variance of malicious observaion/variance of normal observation
+mal_var_coef=0.75; %variance of malicious observaion/variance of normal observation
 num_vehicle=20; % Number of maximun other vehicles observing target vehicle
 num_minvehi=20; % Number of minimum other vehicles in varying vehicle number simulation
 num_malicious = 8; % Number of malicous vehicles
@@ -17,13 +17,13 @@ collu_design_mal_devi_coef=1.5; %deviation in cooradinated trajectory attack=col
 buffer_size=16; %Buffer size for sequential detection
 randAver_times = 1; %How many times will the whole simulation be execeuted to get average performance results
 
-test_mode='oneshot'; %it can be 'oneshot', 'varying_mali', 'varying_total', 'collu_rand_devi_sweep', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
+test_mode='collu_design_devi_sweep'; %it can be 'oneshot', 'varying_mali', 'varying_total', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
 
 %Simple oneshot test, no parameter sweeping, use it to get trajectory estimations of all algorithms
 if strcmp(test_mode,'oneshot')
     num_minvehil=num_vehicle; %vehicle number is fixed
     randAver_times = 1; %No need to average
-    KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode);
+    CoopTracking_MalDetection(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode);
 end
 
 %Num_malicious Sweep
@@ -33,7 +33,7 @@ if strcmp(test_mode,'varying_mali') % Need to set num_minvehicle and num_vehicle
     size_num_mal=size(num_malicious,2);
     RMSE=zeros(5,size_num_mal);
     for i=1:size_num_mal
-        [RMSE(:,i),~,~,~,~]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious(i),filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode);
+        [RMSE(:,i),~,~,~,~]=CoopTracking_MalDetection(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious(i),filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode);
     end
     figure;
     title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', NumTotal:' num2str(num_vehicle) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
@@ -60,7 +60,7 @@ end
 
 %Num_vehicle sweep
 if strcmp(test_mode,'varying_total') % Need to set num_minvehicle and num_vehicle differently
-    KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode); 
+    CoopTracking_MalDetection(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,filter_mode,buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,collu_rand_mal_devi_coef,test_mode); 
 end
 
 %Collu_design devi sweep test
@@ -76,9 +76,9 @@ if strcmp(test_mode,'collu_design_devi_sweep')
     FNR_Devi=zeros(3,size_design_devi);
     
     for i=1:size_design_devi
-        [~,TPR_Devi(1,i),FPR_Devi(1,i),TNR_Devi(1,i),FNR_Devi(1,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'SeqMMSE',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1,test_mode);
-        [~,TPR_Devi(2,i),FPR_Devi(2,i),TNR_Devi(2,i),FNR_Devi(2,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'DMMSD',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1,test_mode);
-        [~,TPR_Devi(3,i),FPR_Devi(3,i),TNR_Devi(3,i),FNR_Devi(3,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'MRED',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1,test_mode);
+        [~,TPR_Devi(1,i),FPR_Devi(1,i),TNR_Devi(1,i),FNR_Devi(1,i)]=CoopTracking_MalDetection(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'SeqMMSE',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1,test_mode);
+        [~,TPR_Devi(2,i),FPR_Devi(2,i),TNR_Devi(2,i),FNR_Devi(2,i)]=CoopTracking_MalDetection(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'DMMSD',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1,test_mode);
+        [~,TPR_Devi(3,i),FPR_Devi(3,i),TNR_Devi(3,i),FNR_Devi(3,i)]=CoopTracking_MalDetection(var_self,var_mea,mal_var_coef,num_vehicle,num_minvehi,num_malicious,'MRED',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef(i),1,test_mode);
     end
 
     figure;
@@ -115,9 +115,9 @@ if strcmp(test_mode,'collu_design_var_sweep')
     FNR_Var=zeros(3,size_design_var);
 
     for i=1:size_design_var
-        [~,TPR_Var(1,i),FPR_Var(1,i),TNR_Var(1,i),FNR_Var(1,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef(i),num_vehicle,num_minvehi,num_malicious,'SeqMMSE',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,1,test_mode);
-        [~,TPR_Var(2,i),FPR_Var(2,i),TNR_Var(2,i),FNR_Var(2,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef(i),num_vehicle,num_minvehi,num_malicious,'DMMSD',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,1,test_mode);
-        [~,TPR_Var(3,i),FPR_Var(3,i),TNR_Var(3,i),FNR_Var(3,i)]=KF_multivehicles(var_self,var_mea,mal_var_coef(i),num_vehicle,num_minvehi,num_malicious,'MRED',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,1,test_mode);
+        [~,TPR_Var(1,i),FPR_Var(1,i),TNR_Var(1,i),FNR_Var(1,i)]=CoopTracking_MalDetection(var_self,var_mea,mal_var_coef(i),num_vehicle,num_minvehi,num_malicious,'SeqMMSE',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,1,test_mode);
+        [~,TPR_Var(2,i),FPR_Var(2,i),TNR_Var(2,i),FNR_Var(2,i)]=CoopTracking_MalDetection(var_self,var_mea,mal_var_coef(i),num_vehicle,num_minvehi,num_malicious,'DMMSD',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,1,test_mode);
+        [~,TPR_Var(3,i),FPR_Var(3,i),TNR_Var(3,i),FNR_Var(3,i)]=CoopTracking_MalDetection(var_self,var_mea,mal_var_coef(i),num_vehicle,num_minvehi,num_malicious,'MRED',buffer_size,space_attack_mode,time_attack_mode,randAver_times,collu_design_mal_devi_coef,1,test_mode);
     end
 
     figure;

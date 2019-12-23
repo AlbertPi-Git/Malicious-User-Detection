@@ -43,7 +43,7 @@ function trust_table = SeqMMSE_search(pos,var_mea,trust_table,cdf_index)
 			pos_next{i}=pos{i};
 			pos_next{i}(:,min_total_index)=[];
 		end	%Choose the subset with min prob as the next input
-		trust_table=ARMMSE_search(pos_next,var_mea,trust_table,cdf_index);
+		trust_table=SeqMMSE_search(pos_next,var_mea,trust_table,cdf_index);
 	else %Didn't exceed prob threshold, then we find a honest subset
 		for i=1:other_vehicle
 			if(i~=min_index)
