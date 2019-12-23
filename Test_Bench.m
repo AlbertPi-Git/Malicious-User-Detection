@@ -15,7 +15,7 @@ time_attack_mode = 'long_design'; %Temporal attack mode, it can be 'long design'
 collu_rand_mal_devi_coef=10;
 collu_design_mal_devi_coef=1.5; %deviation in cooradinated trajectory attack=collu_design_mal_devi_coef*sqrt(var_mea)
 buffer_size=16; %Buffer size for sequential detection
-randAver_times = 1; %How many times will the whole simulation be execeuted to get average performance results
+randAver_times = 5; %How many times will the whole simulation be execeuted to get average performance results
 
 test_content='collu_design_devi_sweep'; %it can be 'varying_mali', 'varying_total', 'collu_rand_devi_sweep', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
 

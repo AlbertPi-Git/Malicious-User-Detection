@@ -4,9 +4,7 @@ function [TPR,FPR,TNR,FNR]=KF_multivehicles(var_self,var_mea,mal_var_coef,num_ve
 
 dt=0.1; %Measurement interval of self and other observations
 t=0:dt:20; %Total simulation time
-
 num_filter=7; %Filter number in comparative simulation of all filter and groundtruth
-
 
 mal_index_mode = 'random'; %Index method of malicious vehicles, it can be 'sequential', 'random' or 'custom' (e.g. if total vehicle number is 20, malicious vehicle number is 5, then indeice of malicious vehicle are '1,2,3,4,5' if mode is 'sequential', 5 random number in 1-30 if mode is 'random' or 5 mannually chosen numbers if mode is 'custom')
 
@@ -162,22 +160,11 @@ for time = 1:randAver_times
         end
     end
 
-    %Initiate the previous trust table which is updated in sequential detetors
-    % prev_trust_table=cell(1,num_vehicle);
-    % for j=num_minvehi:num_vehicle
-    %     prev_trust_table{j}=ones(1,j);
-    % end
-
     %Initialize the total trust values for all other vehicles before each simulation
     total_trust_val=cell(1,num_vehicle);
     for j=num_minvehi:num_vehicle
         total_trust_val{j}=zeros(1,j);
     end
-
-    if(strcmp(time_attack_mode,'long_design'))
-        rand_degree=rand(num_malicious,1)*2*pi; %Each time the rand_degree in polar coordinates is the same for one vehicle
-    end
-
 
 
     for i=1:(size-1)
@@ -224,41 +211,7 @@ for time = 1:randAver_times
         
         % Attack methods in different attack mode
         if(strcmp(space_attack_mode,'indep'))
-            % if(strcmp(time_attack_mode,'long_design')) 
-            %     for j=1:num_malicious
-            %         rand_radius=(1+0.3*rand(1,1))*collu_design_mal_deviation;
-            %         Y21{malicious_index(j)}(1,i+1)=x1(1,i+1)+rand_radius*cos(rand_degree(j));
-            %         Y21{malicious_index(j)}(3,i+1)=x1(3,i+1)+rand_radius*sin(rand_degree(j));
-            %     end
-            %     Mal_time_count=Mal_time_count+1;
-            % elseif(strcmp(time_attack_mode,'long_rand'))
-            %     rand_degree=rand(num_malicious,1)*2*pi; %Each time rand_degree are different
-            %     for j=1:num_malicious
-            %         rand_radius=(1+0.3*rand(1,1))*collu_rand_mal_deviation;
-            %         Y21{malicious_index(j)}(1,i+1)=x1(1,i+1)+rand_radius*cos(rand_degree(j));
-            %         Y21{malicious_index(j)}(3,i+1)=x1(3,i+1)+rand_radius*sin(rand_degree(j));
-            %     end
-            %     Mal_time_count=Mal_time_count+1;
-            % elseif(strcmp(time_attack_mode,'short_rand'))
-            %     if(mod(i,50)==30)
-            %         rand_degree=rand(num_malicious,1)*2*pi; 
-            %         for j=1:num_malicious
-            %             rand_radius=(1+0.3*rand(1,1))*collu_rand_mal_deviation;
-            %             Y21{malicious_index(j)}(1,i+1)=x1(1,i+1)+rand_radius*cos(rand_degree(j));
-            %             Y21{malicious_index(j)}(3,i+1)=x1(3,i+1)+rand_radius*sin(rand_degree(j));
-            %         end
-            %     end
-            %     for j=num_minvehi:num_vehicle
-            %         for k=1:num_malicious
-            %             if(mod(i,50)==30)
-            %                 gt_trust{j}(malicious_index(k))=0; %Only mark the malicious vehicles in gt when attacks occur
-            %                 Mal_time_count=Mal_time_count+1; %Also only increase the malicious count when attacks occur
-            %             else
-            %                 gt_trust{j}(malicious_index(k))=1; 
-            %             end
-            %         end
-            %     end
-            % end
+            % Indepedent attack mode is removed since our concentration is the colluding (coordinated) attack, if needed please find them in the initial commit.
         elseif(strcmp(space_attack_mode,'collu'))
             if(strcmp(time_attack_mode,'long_design')) 
                 for j=1:num_malicious
