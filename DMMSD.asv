@@ -1,5 +1,5 @@
 %Multi-length sequence detectors
-function  [trust_table]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
+function  [trust_table,If_Urgent]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea,prev_trust_table)
 
 	buffer_size=size(Buffer{1},2); %Buffer size of buffer data
 	total_vehicle=size(Buffer,2); %Include the target vehicle itself
@@ -7,7 +7,7 @@ function  [trust_table]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
 
     %Using the dynamic model to get the predictions at the current time of all previous states of all vehicles
 	Cur_states=Buffer;
-	parfor i=1:total_vehicle
+	for i=1:total_vehicle
 		for j=1:buffer_size
 			for k=1:buffer_size-j %Predict the states of all past states at current time by using dynamic model
 				Cur_states{i}(:,j)=F*Cur_states{i}(:,j)+B*ori_u1(:,seq_ini_clk+k+j-1); 
@@ -31,6 +31,7 @@ function  [trust_table]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
         Aver_pos{i}=(Aver_state{i}([1,3],:))';
     end
     
+    kmeansAver_time=11;
     for i=1:num_len
         len=Seq_len(i);
         New_Variance=Var_mea*(6+(len-1)*(2*len-1)*dt^2)/(6*len);
@@ -38,9 +39,12 @@ function  [trust_table]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
         flag=MMSE_check(Aver_state{i}([1,3],1:total_vehicle-1),cdf_index,New_Variance); %Self-estimation is not included in this check
         if(flag)
             cluster_id{i}=zeros(total_vehicle,1);
-            options = statset('UseParallel',1);
-            cluster_id{i}=cluster_id{i}+(kmeans(Aver_pos{i}(:,2),2,'Options',options,'Replicates',5)-1);
-
+            for j=1:kmeansAver_time
+                cluster_id{i}=cluster_id{i}+(kmeans(Aver_pos{i}(:,2),2)-1);
+            end
+            for j=1:total_vehicle
+                cluster_id{i}(j)=cluster_id{i}(j)>kmeansAver_time/2;
+            end
             seq_honest_id=mode(cluster_id{i});  %Cluster with more vehicles are assumed to be honest
             Seq_trust_table{i}=ones(1,total_vehicle-1);
             for j=1:total_vehicle-1
@@ -54,8 +58,14 @@ function  [trust_table]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
     end
     
     %Generate the trust table of other vehicle from clustering results
+    If_Urgent=false;
     trust_table=Seq_trust_table{1};
     
+    %If trust table is very different from previous one, then reverse
+    %current trust table
+    if(sum(xor(prev_trust_table,trust_table))/(total_vehicle-1)>0.6)
+        trust_table=xor(trust_table,ones(1,total_vehicle-1));
+    end
     if(sum(trust_table)==0)
         disp("Trust table is all zeros");
     end

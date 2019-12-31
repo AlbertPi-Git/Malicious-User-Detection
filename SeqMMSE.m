@@ -6,15 +6,15 @@ function pos_trust_table = SeqMMSE(Buffer,var_mea,total_vehicle,cdf_index)
 
 	buffer_size=size(Buffer{1},2);
 	pos=cell(1,buffer_size); %position
-	vel=cell(1,buffer_size); %velocity
-	for i=1:buffer_size
+% 	vel=cell(1,buffer_size); %velocity, but in the paper we decide only use position, so all vel related are commented
+	parfor i=1:buffer_size
 		pos{i}=zeros(3,total_vehicle);
-		vel{i}=zeros(3,total_vehicle);
+% 		vel{i}=zeros(3,total_vehicle);
 		for j=1:total_vehicle
 			pos{i}([1,2],j)=Buffer{j}([1,3],i);
-			vel{i}([1,2],j)=Buffer{j}([2,4],i);
-			pos{i}(3,j)=j;
-			vel{i}(3,j)=j; %Record each index of vehicle before entering the search algorithm
+% 			vel{i}([1,2],j)=Buffer{j}([2,4],i);
+			pos{i}(3,j)=j; %Record each index of vehicle before entering the search algorithm
+% 			vel{i}(3,j)=j; 
 		end
 	end %Convert the buffered data from vehicle index based cell to buffer dim based cell
 	pos_trust_table=zeros(1,total_vehicle);

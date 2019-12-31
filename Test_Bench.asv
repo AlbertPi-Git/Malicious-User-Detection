@@ -17,7 +17,7 @@ collu_design_mal_devi_coef=5/3; %deviation in cooradinated trajectory attack=col
 buffer_size=16; %Buffer size for sequential detection
 randAver_times = 1; %How many times will the whole simulation be execeuted to get average performance results
 
-test_mode='varying_mali'; %it can be 'oneshot', 'varying_mali', 'varying_total', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
+test_mode='collu_design_var_sweep'; %it can be 'oneshot', 'varying_mali', 'varying_total', 'collu_design_devi_sweep' and 'collu_design_var_sweep'
 
 %Simple oneshot test, no parameter sweeping, use it to get trajectory estimations of all algorithms
 if strcmp(test_mode,'oneshot')
