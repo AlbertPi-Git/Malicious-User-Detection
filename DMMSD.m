@@ -1,5 +1,5 @@
 %Multi-length sequence detectors
-function  [trust_table,If_Urgent]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
+function  [trust_table,If_Urgent]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea,prev_trust_table)
 
 	buffer_size=size(Buffer{1},2); %Buffer size of buffer data
 	total_vehicle=size(Buffer,2); %Include the target vehicle itself
@@ -31,7 +31,7 @@ function  [trust_table,If_Urgent]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
         Aver_pos{i}=(Aver_state{i}([1,3],:))';
     end
     
-    kmeansAver_time=11;
+    kmeansAver_time=3;
     for i=1:num_len
         len=Seq_len(i);
         New_Variance=Var_mea*(6+(len-1)*(2*len-1)*dt^2)/(6*len);
@@ -60,6 +60,13 @@ function  [trust_table,If_Urgent]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
     %Generate the trust table of other vehicle from clustering results
     If_Urgent=false;
     trust_table=Seq_trust_table{1};
+    
+    %If trust table is very different from previous one, then reverse
+    %current trust table
+%     if(sum(xor(prev_trust_table,trust_table))/(total_vehicle-1)>0.9)
+%         trust_table=xor(trust_table,ones(1,total_vehicle-1));
+%     end
+    
     if(sum(trust_table)==0)
         disp("Trust table is all zeros");
     end

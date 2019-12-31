@@ -1,5 +1,5 @@
 %Sequential malicious data detector
-function [State_est,false_pos_count,false_neg_count,total_trust_val] = SeqDetector(mode,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,Var_mea,F,B,ori_u1,total_trust_val,false_pos_count,false_neg_count,gt_trust)
+function [State_est,false_pos_count,false_neg_count,total_trust_val] = SeqDetector(mode,i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,Var_mea,F,B,ori_u1,total_trust_val,false_pos_count,false_neg_count,gt_trust,prev_trust_table)
 	
     if(i<buffer_size) %Use a robust filtering algorithm before buffer is ready
         [X_est, P_est]=Array_combination(i,j,X11,P11,X21,P21);
@@ -8,7 +8,7 @@ function [State_est,false_pos_count,false_neg_count,total_trust_val] = SeqDetect
     else %Use the optimal combination when buffer is full and detection is done
         If_Urgent=false;
         if(strcmp(mode,"DMMSD"))
-            [update_trust_table,If_Urgent]=DMMSD([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],i,dt,F,B,ori_u1,Var_mea); %Use Multi_Seq detection algorithm
+            [update_trust_table,If_Urgent]=DMMSD([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],i,dt,F,B,ori_u1,Var_mea,prev_trust_table); %Use Multi_Seq detection algorithm
         %If_Urgent: when it's 'true', use the current update_trust_table to pick vehicles or use accumulate total trust values
         elseif(strcmp(mode,"SeqMMSE"))
             update_trust_table=SeqMMSE(DataSeq_buffer,Var_mea,j,0.4); %Use SeqMMSE detection algorithm to update trust table

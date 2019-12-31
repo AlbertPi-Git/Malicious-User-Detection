@@ -165,6 +165,13 @@ for time = 1:randAver_times
     for j=num_minvehi:num_vehicle
         total_trust_val{j}=zeros(1,j);
     end
+    
+    prev_trust_table=cell(num_filter+2,num_vehicle); 
+    for i=2:num_filter+2
+        for j=1:num_vehicle
+            prev_trust_table{i,j}=ones(1,j);
+        end
+    end
 
     %Before adding some malicious deviation to assumed malicious data, compute the estimation when all vehicles are benign to use in the performance comparison.
     for i=1:(size-1)
@@ -310,16 +317,19 @@ for time = 1:randAver_times
                 All_X1{5,j}(:,i+1)=X_1{j}(:,i+1);    
             end
             if(strcmp(filter_mode,'SeqMMSE')||strcmp(filter_mode,'Al'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqMMSE",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
-                All_X1{6,j}(:,i+1)=X_1{j}(:,i+1); 
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("SeqMMSE",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust,prev_trust_table{6,j});
+                All_X1{6,j}(:,i+1)=X_1{j}(:,i+1);
+                prev_trust_table{6,j}=total_trust_val{j};
             end
             if(strcmp(filter_mode,'DMMSD')||strcmp(filter_mode,'All'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("DMMSD",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("DMMSD",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust,prev_trust_table{7,j});
                 All_X1{7,j}(:,i+1)=X_1{j}(:,i+1); 
+                prev_trust_table{7,j}=total_trust_val{j};
             end
             if(strcmp(filter_mode,'MRED')||strcmp(filter_mode,'Al'))
-                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("MRED",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust);
+                [X_1{j}(:,i+1),false_pos_count(j),false_neg_count(j),total_trust_val{j}]=SeqDetector("MRED",i,j,dt,buffer_size,DataSeq_buffer,X11,Y11,P11,X21,P21,var_mea,F,B,ori_u1,total_trust_val{j},false_pos_count(j),false_neg_count(j),gt_trust,prev_trust_table{8,j});
                 All_X1{8,j}(:,i+1)=X_1{j}(:,i+1); 
+                prev_trust_table{8,j}=total_trust_val{j};
             end
             if(strcmp(filter_mode,'All_benign')||strcmp(filter_mode,'Al'))
                 %Doesn't need to do anything, 'All_benign' result has been saved in All_X1{9,}
