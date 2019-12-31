@@ -20,7 +20,7 @@ function  [trust_table,If_Urgent]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
     num_len=size(Seq_len,2);
 
     Aver_state=cell(1,num_len); %Average states of predictions and current states
-    Aver_pos=cell(1,num_len); 
+    Aver_pos=cell(1,num_len);
     cluster_id=cell(1,num_len); %Cluster results
     Seq_trust_table=cell(1,num_len); 
     for i=1:num_len
@@ -30,14 +30,21 @@ function  [trust_table,If_Urgent]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
         end
         Aver_pos{i}=(Aver_state{i}([1,3],:))';
     end
-
+    
+    kmeansAver_time=11;
     for i=1:num_len
         len=Seq_len(i);
         New_Variance=Var_mea*(6+(len-1)*(2*len-1)*dt^2)/(6*len);
-        cdf_index=0.38;
+        cdf_index=0.3;
         flag=MMSE_check(Aver_state{i}([1,3],1:total_vehicle-1),cdf_index,New_Variance); %Self-estimation is not included in this check
-        if(flag) 
-            cluster_id{i}=kmeans(Aver_pos{i},2);
+        if(flag)
+            cluster_id{i}=zeros(total_vehicle,1);
+            for j=1:kmeansAver_time
+                cluster_id{i}=cluster_id{i}+(kmeans(Aver_pos{i}(:,2),2)-1);
+            end
+            for j=1:total_vehicle
+                cluster_id{i}(j)=cluster_id{i}(j)>kmeansAver_time/2;
+            end
             seq_honest_id=mode(cluster_id{i});  %Cluster with more vehicles are assumed to be honest
             Seq_trust_table{i}=ones(1,total_vehicle-1);
             for j=1:total_vehicle-1
