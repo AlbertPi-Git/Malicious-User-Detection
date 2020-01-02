@@ -9,7 +9,7 @@ function [State_est,false_pos_count,false_neg_count] = SeqDetector(mode,i,j,dt,b
         if(strcmp(mode,"DMMSD"))
             trust_table=DMMSD([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],i,dt,F,B,ori_u1,Var_mea); 
         elseif(strcmp(mode,"SeqMMSE"))
-            trust_table=SeqMMSE(DataSeq_buffer,Var_mea,j,0.8); 
+            trust_table=SeqMMSE(DataSeq_buffer,Var_mea,j,0.7,0.2); %last two params are cdf_index and prob_threshold
         elseif(strcmp(mode,"MRED"))
             trust_table=MRED([DataSeq_buffer(1:j) Y11(:,i-buffer_size+2:i+1)],Var_mea,2.4);
         end

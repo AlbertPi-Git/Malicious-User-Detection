@@ -371,10 +371,11 @@ for time = 1:randAver_times
         xlim([20 550]);
         ylim([4 25]);
         title(['Attack\_mode: ' space_attack_mode time_attack_mode  ', Total:' num2str(num_vehicle) ', NumMal:' num2str(num_malicious) ', VarMea:' num2str(var_mea) ', VarMal:' num2str(mal_var_coef*var_mea) ', Devi1:' num2str(collu_design_mal_devi_coef) ', Devi2:' num2str(collu_rand_mal_devi_coef) ', Aver:' num2str(randAver_times) ', buffer size:' num2str(buffer_size)]);
-        xlabel('X direction (m)','Fontsize',20);
-        ylabel('Y direction (m)','Fontsize',20);
-        legend('Trajectory of Ground Truth','Trajectory of LMS','Trajectory of MAE','Trajectory of DMMSD(Proposed)','Trajectory of MRED(Proposed)');
-        set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',14);
+        xlabel('X direction (m)','Fontsize',24);
+        ylabel('Y direction (m)','Fontsize',24);
+        legend('Trajectory of Ground Truth','Trajectory of LMS','Trajectory of MAE','Trajectory of DMMSD(Proposed)');
+%         legend('Trajectory of Ground Truth','Trajectory of LMS','Trajectory of MAE','Trajectory of DMMSD(Proposed)','Trajectory of MRED(Proposed)');
+        set(gca,'Linewidth',1.4,'GridLineStyle','--','Fontsize',18);
         set(gca,'LooseInset',get(gca,'TightInset'));
         set(gca,'looseInset',[0 0 0 0]);
     end

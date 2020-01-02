@@ -1,15 +1,15 @@
 %Recursive search function
 %This is not the original version, it's added with self-estimation 
-function trust_table = SeqMMSE_search(pos,var_mea,trust_table,cdf_index)
+function trust_table = SeqMMSE_search(pos,var_mea,trust_table,cdf_index,prob_threshold)
+	%cumulative probability index (cdf_index), 2*normcdf(cdf_index)-1 equals to the theoratical probability that MSE of honest subset is within the threshold 
 
 	total_vehicle=size(pos{1},2);
 	other_vehicle=total_vehicle-1;
 	buffer_size=size(pos,2);
 
-%     cdf_index=0.2; %cumulative probability index, 2*normcdf(cdf_index)-1 equals to the theoratical probability that MSE of honest subset is within the threshold 
 	c_square=(cdf_index*2)/sqrt(total_vehicle-1)+2; %total_vehicle-1: exclude an arbitary estimation to form the subset
     pos_threshold=c_square*var_mea; %MMSE threshold given by observation variance and vehicle number of this subset
-    prob_threshold=0.15; %Probability threshold 
+    % prob_threshold=0.15; %Probability threshold %Move to input parameters
 
 	count=zeros(1,other_vehicle);
 	total_MMSE=zeros(1,other_vehicle);
@@ -23,7 +23,7 @@ function trust_table = SeqMMSE_search(pos,var_mea,trust_table,cdf_index)
 			pos_subset{j}=[pos_subset{j} pos{i}([1,2],total_vehicle)]; %Add the self-estimation to the subset
         end
         for j=1:other_vehicle
-	  		[pos_min, pos_MMSE]=MMSE_compute(pos_subset{j});
+	  		[~, pos_MMSE]=MMSE_compute(pos_subset{j});
 	        if(pos_MMSE>pos_threshold) %If MMSE of subset without jth vehicle exceeds the threshold
 	        	count(j)=count(j)+1;
 	        end
@@ -34,7 +34,7 @@ function trust_table = SeqMMSE_search(pos,var_mea,trust_table,cdf_index)
 	malicious_prob=count./buffer_size; %Probability of containing malicious vehicles of all subsets
 
 	[min_prob, min_index]=min(malicious_prob);
-	[min_total_MMSE,min_total_index]=min(total_MMSE);
+	[~,min_total_index]=min(total_MMSE);
 	%If the subset with minimum probability of containing malicious vehicles exceed prob threshold,
 	%then get into the recursive function again to keep finding the honest subset.
 	if(min_prob>prob_threshold) 
@@ -43,7 +43,7 @@ function trust_table = SeqMMSE_search(pos,var_mea,trust_table,cdf_index)
 			pos_next{i}=pos{i};
 			pos_next{i}(:,min_total_index)=[];
 		end	%Choose the subset with min prob as the next input
-		trust_table=SeqMMSE_search(pos_next,var_mea,trust_table,cdf_index);
+		trust_table=SeqMMSE_search(pos_next,var_mea,trust_table,cdf_index,prob_threshold);
 	else %Didn't exceed prob threshold, then we find a honest subset
 		for i=1:other_vehicle
 			if(i~=min_index)
@@ -71,7 +71,7 @@ function trust_table = SeqMMSE_search(pos,var_mea,trust_table,cdf_index)
 	recheck_threshold=recheck_c_square*var_mea; %The number changed, so a new MMSE threshold is needed
 	%MMSE recheck but no need to divide into subsets again
 	for i=1:buffer_size
-  		[pos_min, pos_MMSE]=MMSE_compute(recheck_pos_subset{i});
+  		[~, pos_MMSE]=MMSE_compute(recheck_pos_subset{i});
         if(pos_MMSE>recheck_threshold) 
         	recheck_count=recheck_count+1;
         end

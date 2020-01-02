@@ -7,7 +7,7 @@ function  [trust_table]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
 
     %Using the dynamic model to get the predictions at the current time of all previous states of all vehicles
 	Cur_states=Buffer;
-	parfor i=1:total_vehicle
+	for i=1:total_vehicle
 		for j=1:buffer_size
 			for k=1:buffer_size-j %Predict the states of all past states at current time by using dynamic model
 				Cur_states{i}(:,j)=F*Cur_states{i}(:,j)+B*ori_u1(:,seq_ini_clk+k+j-1); 
@@ -38,8 +38,8 @@ function  [trust_table]=DMMSD(Buffer,cur_clk,dt,F,B,ori_u1,Var_mea)
         flag=MMSE_check(Aver_state{i}([1,3],1:total_vehicle-1),cdf_index,New_Variance); %Self-estimation is not included in this check
         if(flag)
             cluster_id{i}=zeros(total_vehicle,1);
-            options = statset('UseParallel',1);
-            cluster_id{i}=cluster_id{i}+(kmeans(Aver_pos{i}(:,2),2,'Options',options,'Replicates',5)-1);
+            cluster_id{i}=cluster_id{i}+(kmeans(Aver_pos{i}(:,2),2,'Replicates',5)-1);
+
 
             seq_honest_id=mode(cluster_id{i});  %Cluster with more vehicles are assumed to be honest
             Seq_trust_table{i}=ones(1,total_vehicle-1);
